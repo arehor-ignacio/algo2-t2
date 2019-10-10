@@ -5,8 +5,6 @@
 #include <string>
 #include <iostream>
 
-using namespace std;
-
 template <class T>
 class Conjunto
 {
@@ -46,25 +44,24 @@ class Conjunto
 
     private:
 
-        /**
-         * Completar con lo que sea necesario...
-         **/
+        T& _min;
+        T& _max;
+        unsigned int _num;
 
         struct Nodo
         {
             // El constructor, toma el elemento al que representa el nodo.
-            Nodo(const T& v);
+            Nodo(const T& v) : _valor(v), _izq(nullptr), _der(nullptr);
             // El elemento al que representa el nodo.
-            T valor;
+            T _valor;
             // Puntero a la raíz del subárbol izquierdo.
-            Nodo* izq;
+            struct Nodo* _izq;
             // Puntero a la raíz del subárbol derecho.
-            Nodo* der; 
+            struct Nodo* _der; 
         };
-
+        
         // Puntero a la raíz de nuestro árbol.
-        Nodo* _raiz;
-
+        struct Nodo* _raiz;
 };
 
 template<class T>
