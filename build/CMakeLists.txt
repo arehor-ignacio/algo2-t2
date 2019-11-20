@@ -14,7 +14,7 @@ add_library(gtest_main STATIC ../tests/gtest-1.8.1/gtest_main.cc)
 file(GLOB SOURCE_FILES ../src/*.cpp ../src/*.h ../src/*.hpp)
 
 # Leemos todos los archivos de test en ./tests
-file(GLOB TEST_SOURCES tests/*.cpp)
+file(GLOB TEST_SOURCES ../tests/*.cpp)
 
 add_executable(correrTests ${SOURCE_FILES} ../tests/conjunto-tests.cpp)
 

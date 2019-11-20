@@ -44,14 +44,10 @@ class Conjunto
 
     private:
 
-        T& _min;
-        T& _max;
-        unsigned int _num;
-
         struct Nodo
         {
             // El constructor, toma el elemento al que representa el nodo.
-            Nodo(const T& v) : _valor(v), _izq(nullptr), _der(nullptr);
+            Nodo(const T& v) : _valor(v), _izq(nullptr), _der(nullptr) {};
             // El elemento al que representa el nodo.
             T _valor;
             // Puntero a la raíz del subárbol izquierdo.
@@ -61,7 +57,12 @@ class Conjunto
         };
         
         // Puntero a la raíz de nuestro árbol.
-        struct Nodo* _raiz;
+        struct Nodo *_raiz;
+        T* _min;
+        T* _max;
+        unsigned int _num;
+
+        void actualizarMinMax();
 };
 
 template<class T>
@@ -69,7 +70,6 @@ std::ostream& operator<<(std::ostream& os, const Conjunto<T>& c) {
 	 c.mostrar(os);
 	 return os;
 }
-
 #include "Conjunto.hpp"
 
 #endif // CONJUNTO_H_
