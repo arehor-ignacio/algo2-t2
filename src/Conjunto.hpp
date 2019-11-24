@@ -1,138 +1,130 @@
-#include <vector>
+
+#include "Conjunto.h"
 
 template <class T>
-Conjunto<T>::Conjunto() : _min(T()), _max(T()), _num(0), _raiz(nullptr) {}
-
-void destruirNodo (struct Nodo* nodo) {
-    if (nodo != nullptr) {
-        destruirNodo(nodo->_izq);
-        destruirNodo(nodo->_der);
-        delete nodo;
-    }
+Conjunto<T>::Conjunto() : _raiz(nullptr), _size(0) {
 }
 
 template <class T>
 Conjunto<T>::~Conjunto() {
-    destruirNodo(_raiz);
+    eliminarNodo(this->_raiz);
+}
+
+template<class T>
+void Conjunto<T>::eliminarNodo(Conjunto::Nodo* pNodo) {
+    if (pNodo != nullptr) {
+        eliminarNodo(pNodo->izq);
+        eliminarNodo(pNodo->der);
+        delete pNodo;
+    }
 }
 
 template <class T>
 bool Conjunto<T>::pertenece(const T& clave) const {
-    bool res = false;
-    struct Nodo *nodo = _raiz;
-    T* val = &(nodo->_valor);
-
-    while (nodo != nullptr && clave != *val) {
-        if (clave < *val) nodo = nodo->_izq;
-        else nodo = nodo->_der;
-        val = &(nodo->_valor);
+    struct Nodo* nodoArbol = this->_raiz;
+    while (nodoArbol != nullptr && nodoArbol->valor != clave) {
+        if (clave < nodoArbol->valor) nodoArbol = nodoArbol->izq;
+        else nodoArbol = nodoArbol->der;
     }
-    
-    return nodo != nullptr;
+    return nodoArbol != nullptr;
 }
 
 template <class T>
 void Conjunto<T>::insertar(const T& clave) {
-    struct Nodo **ptrDirSiguiente = &(_raiz);
-    T* val = &((*ptrDirSiguiente)->_valor);    
-
-    while (*ptrDirSiguiente != nullptr && clave != *val) {
-        if (clave < *val) ptrDirSiguiente = &((*ptrDirSiguiente)->_izq);
-        else ptrDirSiguiente = &((*ptrDirSiguiente)->_der);
-        val = &((*ptrDirSiguiente)->_valor);
+    struct Nodo** pDirNodo = &(this->_raiz);
+    while (*pDirNodo != nullptr && (*pDirNodo)->valor != clave){
+        if (clave < (*pDirNodo)->valor) pDirNodo = &((*pDirNodo)->izq);
+        else pDirNodo = &((*pDirNodo)->der);
     }
-
-    // Cuando salimos del ciclo, tenemos que agregar el elemento
-
-    if (*ptrDirSiguiente == nullptr) {   
-       struct Nodo *nuevo = new Nodo(clave);
-        *ptrDirSiguiente = nuevo;
-        if (clave < *_min) _min = &(nuevo->_valor);
-        if (!(clave < *_max)) _max = &(nuevo->_valor);
-        _num++;
+    if (*pDirNodo == nullptr) {
+        *pDirNodo = new Nodo(clave);
+        this->_size++;
     }
-}       
+}
 
 template <class T>
 void Conjunto<T>::remover(const T& clave) {
-   struct Nodo **ptrDirSiguiente = &(_raiz);
-    T* val = &((*ptrDirSiguiente)->_valor);
-    std::vector<Nodo*> padres = std::vector<Nodo*>();
-
-    while ((*ptrDirSiguiente != nullptr) && (clave != *val)) {
-        padres.push_back(*ptrDirSiguiente);
-        if (clave < *val) ptrDirSiguiente = &((*ptrDirSiguiente)->_izq);
-        else ptrDirSiguiente = &((*ptrDirSiguiente)->_der);
+    struct Nodo** pDirNodo = &(this->_raiz);
+    this->_size--;
+    while ((*pDirNodo)->valor != clave) {
+        if (clave < (*pDirNodo)->valor) pDirNodo = &((*pDirNodo)->izq);
+        else pDirNodo = &((*pDirNodo)->der);
     }
-    // Si lo encontramos, lo eliminamos. Si no, terminamos.
-    if (*ptrDirSiguiente != nullptr) {
-        // Es una hoja
-        if ((*ptrDirSiguiente)->_izq == nullptr &&
-            (*ptrDirSiguiente)->_der == nullptr) {
-            struct Nodo* tmpNodo = *ptrDirSiguiente;
-            *ptrDirSiguiente = nullptr;
-            delete tmpNodo;
-        } else if ((*ptrDirSiguiente)->_izq == nullptr ||
-                (*ptrDirSiguiente)->_der == nullptr) {
-            
+    if (esHoja(*pDirNodo)) {
+        delete *pDirNodo;
+        *pDirNodo = nullptr;
+    }
+    else if ((*pDirNodo)->izq == nullptr && (*pDirNodo)->der != nullptr) {
+        struct Nodo* hijoDer = (*pDirNodo)->der;
+        delete *pDirNodo;
+        *pDirNodo = hijoDer;
+    }
+    else if ((*pDirNodo)->der == nullptr && (*pDirNodo)->izq != nullptr) {
+        struct Nodo* hijoIzq = (*pDirNodo)->izq;
+        delete *pDirNodo;
+        *pDirNodo = hijoIzq;
+    }
+    else {
+        struct Nodo** pNodo = &((*pDirNodo)->izq);
+        while ((*pNodo)->der != nullptr) {
+            pNodo = &((*pNodo)->der);
         }
+        struct Nodo* pPred = *pNodo;
+        *pNodo = (*pNodo)->izq;
 
-        // Actualizamos el minimo y el máximo, independientemente si el nodo que
-        // borramos lo era o no.
-
-        actualizarMinMax();
-
-        // if ((*ptrDirSiguiente)->_izq == nullptr) // Encontrar sucesor
-        // else // Encontrar predecesor
-        //     //ambas funciones pueden devolver null, de esa manera contempalmos
-        //     el caso en que sea una hoja. También tenemos que eliminar limpiar
-        //     el puntero al hijo del que puenteamos.
+        pPred->izq = (*pDirNodo)->izq;
+        pPred->der = (*pDirNodo)->der;
+        delete *pDirNodo;
+        *pDirNodo = pPred;
 
     }
 }
-// Pre {clave:T € conj:Conjunto<T> ^L siguiente(clave):T € conj:Conjunto<T>}
+
 template <class T>
 const T& Conjunto<T>::siguiente(const T& clave) {
-    struct Nodo *nodo = _raiz;
-    T* val = &(nodo->_valor);
-    std::vector<Nodo*> stackNodos = std::vector<Nodo*>();
-    T* res;
-
-    // Encontrar el nodo cuyo valor es _clave_
-    while (clave != *val) {
-        stackNodos.push_back(nodo);
-        if (clave < *val) nodo = nodo->_izq;
-        else nodo = nodo->_der;
-        val = &(nodo->_valor);
+    struct Nodo* pNodo = this->_raiz;
+    std::stack<struct Nodo*> padres = std::stack<struct Nodo*>();
+    while (pNodo->valor != clave) {
+        padres.push(pNodo);
+        if (clave < pNodo->valor) pNodo = pNodo->izq;
+        else pNodo = pNodo->der;
     }
-    if (nodo->_der != nullptr) {
-        nodo = nodo->_der;
-        while (nodo->_izq != nullptr) {nodo = nodo->_izq;}
-        res = &(nodo->_valor);
-    } else {
-        while (nodo->_valor < clave) {
-            nodo = stackNodos.back();
-            stackNodos.pop_back();
+    if (pNodo->der != nullptr) {
+        pNodo = pNodo->der;
+        while (pNodo->izq != nullptr) {
+            pNodo = pNodo->izq;
         }
-          res = &(nodo->_valor);
+        return pNodo->valor;
+    } else {
+        while (pNodo != padres.top()->izq) {
+            pNodo = padres.top();
+            padres.pop();
+        }
+        return padres.top()->valor;
     }
-    
-    return *res;
 }
 
 template <class T>
 const T& Conjunto<T>::minimo() const {
-    return *_min;
+    struct Nodo* pNodo = this->_raiz;
+    while (pNodo->izq != nullptr) {
+        pNodo = pNodo->izq;
+    }
+    return pNodo->valor;
 }
 
 template <class T>
 const T& Conjunto<T>::maximo() const {
-    return *_max;
+    struct Nodo* pNodo = this->_raiz;
+    while (pNodo->izq != nullptr) {
+        pNodo = pNodo->der;
+    }
+    return pNodo->valor;
 }
 
 template <class T>
 unsigned int Conjunto<T>::cardinal() const {
-    return _num;
+    return this->_size;
 }
 
 template <class T>
@@ -140,3 +132,7 @@ void Conjunto<T>::mostrar(std::ostream&) const {
     assert(false);
 }
 
+template<class T>
+bool Conjunto<T>::esHoja(struct Nodo* pNodo) {
+    return (pNodo == nullptr || (pNodo->izq == nullptr && pNodo->der == nullptr));
+}
