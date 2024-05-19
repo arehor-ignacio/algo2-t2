@@ -3,13 +3,11 @@
 
 #include <assert.h>
 #include <string>
-#include <stack>
 #include <iostream>
 
-using namespace std;
-
 template <class T>
-class Conjunto {
+class Conjunto
+{
 public:
 
     // Constructor. Genera un conjunto vacío.
@@ -20,45 +18,51 @@ public:
 
     // Inserta un elemento en el conjunto. Si este ya existe,
     // el conjunto no se modifica.
-    void insertar(const T &);
+    void insertar(const T&);
 
     // Decide si un elemento pertenece al conjunto o no.
-    bool pertenece(const T &) const;
+    bool pertenece(const T&) const;
 
     // Borra un elemento del conjunto. Si este no existe,
     // el conjunto no se modifica.
-    void remover(const T &);
+    void remover(const T&);
 
     // Siguiente elemento al recibido por párametro, en orden.
-    const T &siguiente(const T &elem);
+    const T& siguiente(const T& elem);
 
     // Devuelve el mínimo elemento del conjunto según <.
-    const T &minimo() const;
+    const T& minimo() const;
 
     // Devuelve el máximo elemento del conjunto según <.
-    const T &maximo() const;
+    const T& maximo() const;
 
     // Devuelve la cantidad de elementos que tiene el conjunto.
     unsigned int cardinal() const;
 
     // Muestra el conjunto.
-    void mostrar(std::ostream &) const;
+    void mostrar(std::ostream&) const;
 
 private:
 
-    struct Nodo {
-        Nodo(const T &v) : valor(v), izq(nullptr), der(nullptr) {};
-
-        T valor;
-        Nodo *izq;
-        Nodo *der;
+    struct Nodo
+    {
+        // El constructor, toma el elemento al que representa el nodo.
+        Nodo(const T& v) : _valor(v), _izq(nullptr), _der(nullptr) {};
+        // El elemento al que representa el nodo.
+        T _valor;
+        // Puntero a la raíz del subárbol izquierdo.
+        struct Nodo* _izq;
+        // Puntero a la raíz del subárbol derecho.
+        struct Nodo* _der;
     };
 
+    // Puntero a la raíz de nuestro árbol.
     struct Nodo *_raiz;
-    int _size;
+    T* _min;
+    T* _max;
+    unsigned int _num;
 
-    void eliminarNodo(struct Nodo*);
-    bool esHoja(struct Nodo*);
+    void actualizarMinMax();
 };
 
 template<class T>
@@ -66,22 +70,6 @@ std::ostream& operator<<(std::ostream& os, const Conjunto<T>& c) {
     c.mostrar(os);
     return os;
 }
-
 #include "Conjunto.hpp"
 
 #endif // CONJUNTO_H_
-
-
-
-
-
-
-
-
- struct Nodo {
-        Nodo(const T &v) : valor(v), izq(nullptr), der(nullptr) {};
-
-        T valor;
-        Nodo *izq;
-        Nodo *der;
-};
